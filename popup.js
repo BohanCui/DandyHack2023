@@ -3,10 +3,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const addButton = document.getElementById('addButton');
     const blockedList = document.getElementById('blockedList');
     const saveButton = document.getElementById('saveButton');
-    const memberInput = document.getElementById('memberInput');
-    const addMemberButton = document.getElementById('addMemberButton');
-    const memberList = document.getElementById('memberList');
-    const saveMemberButton = document.getElementById('saveMemberButton');
+    const nameInput = document.getElementById('nameInput');
+    const addNameButton = document.getElementById('addNameButton');
+    const group = document.getElementById('groupID');
+    const saveGroupButton = document.getElementById('saveGroupButton');
 
     addButton.addEventListener('click', function() {
         const website = websiteInput.value.trim();
@@ -20,22 +20,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     saveButton.addEventListener('click', function() {
         const blockedWebsites = Array.from(blockedList.children).map(li => li.textContent);
-        // Save the list of blocked websites (blockedWebsites) using Chrome storage API or any other method.
-        // Example: chrome.storage.sync.set({ blockedWebsites: blockedWebsites });
+        // send this to the server for storage
     });
 
-    addMemberButton.addEventListener('click', function() {
-        const member = memberInput.value.trim();
-        if (member) {
-            const listItem = document.createElement('li');
-            listItem.textContent = member;
-            memberList.appendChild(listItem);
-            memberInput.value = '';
-        }
+    addNameButton.addEventListener('click', function() {
+        const name = nameInput.value.trim();
+        // send this to server for storage
+        nameInput.value = '';
     });
 
-    saveMemberButton.addEventListener('click', function() {
-        const teamMembers = Array.from(memberList.children).map(li => li.textContent);
+    saveGroupButton.addEventListener('click', function() {
         // send this to the server for storage
     });
 
