@@ -23,15 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // send this to the server for storage
     });
 
-    addNameButton.addEventListener('click', function() {
-        const name = nameInput.value.trim();
-        // send this to server for storage
-        nameInput.value = '';
-    });
-
-    saveGroupButton.addEventListener('click', function() {
-        // send this to the server for storage
-    });
+    saveUserButton.addEventListener('click', page_redirect);
 
     // You may want to load and display any previously saved blocked websites when the popup opens.
     // Example: chrome.storage.sync.get(['blockedWebsites'], function(result) {
@@ -44,3 +36,15 @@ document.addEventListener('DOMContentLoaded', function() {
     //    }
     // });
 });
+
+function page_redirect(){  
+    // if serve sends a success added message, redirect; else, re-enter
+
+    const name = nameInput.value.trim();
+    // send this to server for storage
+    nameInput.value = '';
+    window.location = "https://www.google.com";
+
+    // wiåndow.location = "localhost:3000/popup.html";  
+    
+}  
