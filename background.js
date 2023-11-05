@@ -7,14 +7,6 @@ correct logic of the file should be:
 4. when a notification from another team member is received from server's message function,  display it as an alarm. 
 */
 
-/*
-correct logic of the file should be:
-1. When a user sets or updates their groupId, store it locally, and push it to the server by calling clinet.js's function joinGroup(username,group id)
-2. When a user add URL to the prohibited list, store it locally, and push the list to the server by calling clinet.js's function updateList((groupid,list))
-3. when detected a visits a prohibited website, push it to the server by calling clinet.js's function message(groupid, "this user${username}" has visited the prohibited "${visitedDomain}")
-4. when a notification from another team member is received from server's message function,  display it as an alarm. 
-*/
-
 
 // Extracts the domain from a URL to check against the prohibited websites.
 function extractDomain(url) {
@@ -37,13 +29,13 @@ const socket = io('http://localhost:3000'); // Replace with your server address.
 // When a user sets or updates their groupId, store it locally.
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === "setGroupId") {
-        chrome.storage.local.set({ groupId: request.groupId }, function() {
+        chrome.storage.local.set({ groupId: request.groupId, username: request.username }, function() {
             console.log('groupId saved:', request.groupId);
+            console.log('username saved:', request.username);
             joinGroup(request.username, request.groupId);  // Notify the server of the group change
             sendResponse({ success: true });
-        });
         return true; // Indicates asynchronous response
-        
+    }
     } else if (request.action === "updateSites") {
         prohibitedWebsites = request.sites.map(extractDomain);
         chrome.storage.local.get('groupId', function(data) {
