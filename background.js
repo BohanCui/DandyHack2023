@@ -1,5 +1,14 @@
 
-//Extracts the domain from a URL to check against the prohibited websites.
+/*
+correct logic of the file should be:
+1. When a user sets or updates their groupId, store it locally, and push it to the server by calling clinet.js's function joinGroup(username,group id)
+2. When a user add URL to the prohibited list, store it locally, and push the list to the server by calling clinet.js's function updateList((groupid,list))
+3. when detected a visits a prohibited website, push it to the server by calling clinet.js's function message(groupid, "this user${username}" has visited the prohibited "${visitedDomain}")
+4. when a notification from another team member is received from server's message function,  display it as an alarm. 
+*/
+
+
+// Extracts the domain from a URL to check against the prohibited websites.
 function extractDomain(url) {
     let domain;
     // Find & remove protocol (http, ftp, etc.) and get domain
@@ -14,45 +23,51 @@ function extractDomain(url) {
 }
 
 
-
 let prohibitedWebsites = [];
+const socket = io('http://localhost:3000'); // Replace with your server address.
 
-// Establishing a connection to a Socket.io server.
-const socket = io('http://your_server_address:3000'); // Replace with your server address.
-
-// Listen for updates from the popup when a user saves their prohibited websites.
+// When a user sets or updates their groupId, store it locally.
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === "updateSites") {
-        // Only store domains in the prohibitedWebsites list
+    if (request.action === "setGroupId") {
+        chrome.storage.local.set({ groupId: request.groupId }, function() {
+            console.log('groupId saved:', request.groupId);
+            joinGroup(request.username, request.groupId);  // Notify the server of the group change
+            sendResponse({ success: true });
+        });
+        return true; // Indicates asynchronous response
+    } else if (request.action === "updateSites") {
         prohibitedWebsites = request.sites.map(extractDomain);
+        chrome.storage.local.get('groupId', function(data) {
+            updateList(data.groupId, prohibitedWebsites);  // Update the server with the new list
+        });
     }
 });
-
 
 // Monitor the tabs to detect when a user visits a website.
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status === 'complete' && tab.url) {
         const visitedDomain = extractDomain(tab.url);
-
-        // If the visited domain is in the prohibited list, notify the other team members.
-        if (prohibitedWebsites.includes(visitedDomain)) {
-            chrome.storage.local.get('username', function(data) {
-                const username = data.username;  
-                const message = `"${username}" has visited the prohibited "${visitedDomain}" website! 今晚请吃饭！`;
-                socket.emit('sendNotification', { message });
+        
+        // Fetch the most recent list from the server
+        chrome.storage.local.get('groupId', function(data) {
+            getList(data.groupId, function(receivedList) {
+                if (receivedList && receivedList.includes(visitedDomain)) {
+                    chrome.storage.local.get(['username', 'groupId'], function(data) {
+                        const msg = `User "${data.username}" has visited the prohibited "${visitedDomain}" website!`;
+                        message(data.groupId, msg);  // Notify the server of the violation
+                    });
+                }
             });
-        }
+        });
     }
 });
 
-
-// When a notification from another team member is received, display it.
-socket.on('receiveNotification', (data) => {
+// When a notification from another team member is received from the server, display it.
+socket.on('message', (message) => {
     chrome.notifications.create({
         type: 'basic',
         iconUrl: 'icon128.png',
         title: 'Notification',
-        message: data.message
+        message: message
     });
 });
-
