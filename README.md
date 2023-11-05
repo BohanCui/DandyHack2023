@@ -1,4 +1,4 @@
-# DandyHack2023 - 摸鱼禁止/捕鱼器
+# DandyHack2023 - Fish Catcher摸鱼禁止/捕鱼器
 
 ## Goal:
 keep a user input lists of websites
