@@ -1,5 +1,3 @@
-'use strict';
-
 document.addEventListener('DOMContentLoaded', function() {
     const websiteInput = document.getElementById('websiteInput');
     const addButton = document.getElementById('addButton');
@@ -22,16 +20,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     saveButton.addEventListener('click', function() {
         const blockedWebsites = Array.from(blockedList.children).map(li => li.textContent);
-        chrome.storage.local.set({ blockedWebsites: blockedWebsites }).then(() => {
-            console.log("Value is set");
-          });
-        // blockedList.value = '';
-        // send this to the server for storage
+        const messageObj = {
+            action: "setWebsites", 
+            websites: blockedWebsites, 
+            groupId: group.value
+        };
+        console.log("Sending message:", messageObj);
+        chrome.runtime.sendMessage(messageObj);
     });
 
 
     saveUserButton.addEventListener('click',function(){
-        const messageObj = {action: "setGroupId", groupId: "12345", username: "JohnDoe"};
+        const messageObj = {
+            action: "setGroupId", 
+            groupId: group.value, 
+            username: nameInput.value
+        };
         console.log("Sending message:", messageObj);
         chrome.runtime.sendMessage(messageObj);
         // chrome.runtime.sendMessage({groupId: group, username: nameInput}, function(response) {
@@ -57,7 +61,30 @@ document.addEventListener('DOMContentLoaded', function() {
     //        });
     //    }
     // });
+    
+    // NOT WOWRKING RIGHT NOW!!!
+    // chrome.alarms.onAlarm.addListener(async (alarm) => {
+    //     console.log("Alarm received");
+    //     console.log(alarm);
+    //     alarm = JSON.stringify(alarm);
+    //     console.log(alarm);
+    //     if (alarm.name === "prohibitedVisit") {
+    //         // TODO: change username if the sever is working as intended
+    //         alert(`User visited a prohibited website ${request.website}`);
+    //     }
+    // });
 });
+
+// chrome.runtime.onMessage.addListener(
+//     (request, sender, sendResponse) => {
+//         if (request.action === "prohibitedVisit") {
+//             console.log("Receiving prohibited visit message")
+//             // TODO: change chrome.storage.local.get('username') if the sever is working as intended
+//             alert(`User ${chrome.storage.local.get('username')} visited a prohibited website ${request.website}`);
+//         }
+//     }
+// );
+
 
 function redirect(){
     

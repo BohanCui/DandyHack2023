@@ -35,7 +35,7 @@ function getList(id){
   socket.emit('getList', id);
 }
 socket.on('getList', (list) => {
-    chrome.runtime.sendMessage({ action: "receivedList", sites: list });
+  console.log(list);
 });
 
 function updateList(id,list){
